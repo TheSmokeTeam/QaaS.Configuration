@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>QaaS.Framework.ElasticBootstrap</PackageId>
+    <Authors>SmokeTeam</Authors>
+    <Description>Internal bootstrap package for QaaS Elastic logging defaults.</Description>
+    <RepositoryType>git</RepositoryType>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="buildTransitive\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive\QaaS.Framework.ElasticBootstrap.targets"
+          Pack="true"
+          PackagePath="buildTransitive\QaaS.Framework.ElasticBootstrap.targets" />
+    <None Include="buildTransitive\QaaS.Framework.ElasticBootstrap.g.cs"
+          Pack="true"
+          PackagePath="buildTransitive\QaaS.Framework.ElasticBootstrap.g.cs" />
+    <None Include="..\README.md" Pack="true" PackagePath="/" Link="README.md" />
+  </ItemGroup>
+
+</Project>

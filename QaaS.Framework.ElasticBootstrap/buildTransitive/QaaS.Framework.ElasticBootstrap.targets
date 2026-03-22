@@ -1,0 +1,14 @@
+<Project>
+
+  <ItemGroup Condition="'$(QaaSFrameworkElasticBootstrapInjected)' != 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)QaaS.Framework.ElasticBootstrap.g.cs"
+             Link="QaaS.Framework.ElasticBootstrap.g.cs"
+             AutoGen="true"
+             Visible="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <QaaSFrameworkElasticBootstrapInjected>true</QaaSFrameworkElasticBootstrapInjected>
+  </PropertyGroup>
+
+</Project>
