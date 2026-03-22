@@ -1,8 +1,8 @@
 using System.Runtime.CompilerServices;
 
-namespace QaaS.Framework.ElasticBootstrap;
+namespace QaaS.ElasticBootstrap;
 
-internal static class QaaSFrameworkElasticBootstrapModuleInitializer
+internal static class QaaSElasticBootstrapModuleInitializer
 {
     [ModuleInitializer]
     internal static void Initialize() => Bootstrap.Register();

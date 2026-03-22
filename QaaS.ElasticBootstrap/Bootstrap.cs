@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace QaaS.Framework.ElasticBootstrap;
+namespace QaaS.ElasticBootstrap;
 
 /// <summary>
 /// Registers the package's Elastic logging defaults when the consuming app starts.
@@ -11,7 +11,7 @@ public static class Bootstrap
     private static bool _registered;
 
     /// <summary>
-    /// Attempts to register the package defaults once. Missing config is treated as a no-op.
+    /// Attempts to register the package defaults once.
     /// </summary>
     public static void Register()
     {
@@ -28,12 +28,6 @@ public static class Bootstrap
 
     private static bool TryRegisterDefaults()
     {
-        var settings = ElasticBootstrapSettingsLoader.TryLoad();
-        if (settings is null)
-        {
-            return false;
-        }
-
         try
         {
             var executionLoggingType = Type.GetType(
@@ -59,10 +53,10 @@ public static class Bootstrap
 
             registerDefaultsMethod.Invoke(null,
             [
-                settings.SendLogs,
-                settings.ElasticUri,
-                settings.ElasticUsername,
-                settings.ElasticPassword
+                ElasticBootstrapDefaults.SendLogs,
+                ElasticBootstrapDefaults.ElasticUri,
+                ElasticBootstrapDefaults.ElasticUsername,
+                ElasticBootstrapDefaults.ElasticPassword
             ]);
 
             return true;
