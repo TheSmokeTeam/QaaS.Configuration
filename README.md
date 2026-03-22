@@ -11,6 +11,19 @@ It is intentionally separate from `QaaS.Framework` so the public framework packa
 - Does nothing when the JSON file is missing.
 - Does not change explicit user settings. In `QaaS.Framework`, explicit flags and logger configuration files still win.
 
+## How it works
+
+The flow is:
+
+1. A consuming application references `QaaS.Framework.ElasticBootstrap`.
+2. The package injects a small module initializer into that consuming build through `buildTransitive`.
+3. When the application starts, that initializer calls `QaaS.Framework.ElasticBootstrap.Bootstrap.Register()`.
+4. `Bootstrap.Register()` looks for a local JSON configuration file.
+5. If a configuration file is found, the bootstrap package calls `QaaS.Framework.Executions.ExecutionLogging.RegisterDefaults(...)`.
+6. Later, when `QaaS.Framework.Executions` builds the per-run logger, it uses those registered defaults only if the caller did not already provide explicit logging settings.
+
+That means `QaaS.Framework` does **not** automatically discover this package by name from a NuGet source. The framework only becomes aware of it when the consuming application actually references the package and loads the bootstrap assembly at runtime.
+
 ## Important limitation
 
 NuGet will not restore this package automatically unless a consuming project references it, or another package in that project's graph depends on it.
