@@ -70,6 +70,16 @@ This design only works if the bootstrap package version required by `QaaS.Framew
 
 Because the framework package now depends on `QaaS.ElasticBootstrap`, you must publish the public `1.0.0` package before publishing a framework version that references it.
 
+## CI and publish
+
+This repository includes a GitHub Actions workflow that matches the QaaS package publishing pattern used in other repos such as `QaaS.Runner`:
+
+- it restores and builds on every push and pull request
+- it packs only when a Git tag is pushed
+- it publishes to NuGet.org using the repository secret `NUGET_AUTH_TOKEN`
+
+For the public package, create and push tag `1.0.0` from the commit you want to publish.
+
 ## Build
 
 Build:
@@ -95,4 +105,4 @@ dotnet nuget push .\QaaS.ElasticBootstrap\bin\Release\QaaS.ElasticBootstrap.1.0.
   --skip-duplicate
 ```
 
-This repository intentionally does not include CI workflows.
+For air-gapped use, do not change the public workflow. Instead, use the internal packaging script in `scripts/Publish-InternalElasticBootstrapPackage.ps1` to rebuild the same package ID and version with your internal defaults, then push that internal package to the higher-priority Artifactory source.
