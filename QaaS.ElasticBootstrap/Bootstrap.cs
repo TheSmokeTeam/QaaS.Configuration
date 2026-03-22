@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace QaaS.ElasticConfiguration;
+namespace QaaS.ElasticBootstrap;
 
 /// <summary>
 /// Registers the package's Elastic logging defaults when the consuming app starts.
@@ -53,10 +53,10 @@ public static class Bootstrap
 
             registerDefaultsMethod.Invoke(null,
             [
-                ElasticConfigurationDefaults.SendLogs,
-                ElasticConfigurationDefaults.ElasticUri,
-                ElasticConfigurationDefaults.ElasticUsername,
-                ElasticConfigurationDefaults.ElasticPassword
+                ElasticBootstrapDefaults.SendLogs,
+                ElasticBootstrapDefaults.ElasticUri,
+                ElasticBootstrapDefaults.ElasticUsername,
+                ElasticBootstrapDefaults.ElasticPassword
             ]);
 
             return true;

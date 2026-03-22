@@ -13,8 +13,8 @@ $ArtifactoryApiKey = ""
 
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepositoryRoot = Split-Path -Parent $ScriptRoot
-$ProjectPath = Join-Path $RepositoryRoot "QaaS.ElasticConfiguration\QaaS.ElasticConfiguration.csproj"
-$DefaultsFilePath = Join-Path $RepositoryRoot "QaaS.ElasticConfiguration\ElasticConfigurationDefaults.cs"
+$ProjectPath = Join-Path $RepositoryRoot "QaaS.ElasticBootstrap\QaaS.ElasticBootstrap.csproj"
+$DefaultsFilePath = Join-Path $RepositoryRoot "QaaS.ElasticBootstrap\ElasticBootstrapDefaults.cs"
 $ArtifactsRoot = Join-Path $RepositoryRoot "artifacts"
 $OutputDirectory = Join-Path $ArtifactsRoot "internal-package"
 $TempRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("qaas-elastic-bootstrap-" + [System.Guid]::NewGuid().ToString("N"))
@@ -41,13 +41,13 @@ function New-DefaultsFileContent {
     )
 
     @"
-namespace QaaS.ElasticConfiguration;
+namespace QaaS.ElasticBootstrap;
 
 /// <summary>
 /// Built-in fallback values registered by the bootstrap package when no explicit Elastic options were provided.
 /// Replace these values in the air-gapped variant and publish it with the same package ID and version.
 /// </summary>
-public static class ElasticConfigurationDefaults
+public static class ElasticBootstrapDefaults
 {
     /// <summary>
     /// Enables the existing Elastic sink path when no explicit run value was provided.
@@ -83,7 +83,7 @@ New-Item -ItemType Directory -Path $TempRoot -Force | Out-Null
 try {
     Copy-Item $RepositoryRoot\* $TempRoot -Recurse -Force -Exclude ".git", "bin", "obj", "artifacts"
 
-    $tempDefaultsFilePath = Join-Path $TempRoot "QaaS.ElasticConfiguration\ElasticConfigurationDefaults.cs"
+    $tempDefaultsFilePath = Join-Path $TempRoot "QaaS.ElasticBootstrap\ElasticBootstrapDefaults.cs"
     $defaultsFileContent = New-DefaultsFileContent -ConfiguredSendLogs $SendLogs `
         -ConfiguredElasticUri $ElasticUri `
         -ConfiguredElasticUsername $ElasticUsername `
@@ -91,7 +91,7 @@ try {
 
     Set-Content -Path $tempDefaultsFilePath -Value $defaultsFileContent -Encoding UTF8
 
-    dotnet pack (Join-Path $TempRoot "QaaS.ElasticConfiguration\QaaS.ElasticConfiguration.csproj") `
+    dotnet pack (Join-Path $TempRoot "QaaS.ElasticBootstrap\QaaS.ElasticBootstrap.csproj") `
         -c Release `
         -o $OutputDirectory `
         -p:PackageVersion=$PackageVersion `

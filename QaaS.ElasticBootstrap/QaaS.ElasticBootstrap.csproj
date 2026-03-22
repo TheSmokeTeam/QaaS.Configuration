@@ -4,8 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>QaaS.ElasticConfiguration</PackageId>
-    <AssemblyName>QaaS.ElasticConfiguration</AssemblyName>
+    <PackageId>QaaS.ElasticBootstrap</PackageId>
+    <AssemblyName>QaaS.ElasticBootstrap</AssemblyName>
     <Authors>SmokeTeam</Authors>
     <Description>Bootstrap package for QaaS Elastic logging fallback defaults.</Description>
     <RepositoryType>git</RepositoryType>
@@ -20,15 +20,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="buildTransitive\QaaS.ElasticConfiguration.props"
+    <None Include="buildTransitive\QaaS.ElasticBootstrap.props"
           Pack="true"
-          PackagePath="buildTransitive\QaaS.ElasticConfiguration.props" />
-    <None Include="buildTransitive\QaaS.ElasticConfiguration.targets"
+          PackagePath="buildTransitive\QaaS.ElasticBootstrap.props" />
+    <None Include="buildTransitive\QaaS.ElasticBootstrap.targets"
           Pack="true"
-          PackagePath="buildTransitive\QaaS.ElasticConfiguration.targets" />
-    <None Include="buildTransitive\QaaS.ElasticConfiguration.g.cs"
+          PackagePath="buildTransitive\QaaS.ElasticBootstrap.targets" />
+    <None Include="buildTransitive\QaaS.ElasticBootstrap.g.cs"
           Pack="true"
-          PackagePath="buildTransitive\QaaS.ElasticConfiguration.g.cs" />
+          PackagePath="buildTransitive\QaaS.ElasticBootstrap.g.cs" />
     <None Include="..\README.md" Pack="true" PackagePath="/" Link="README.md" />
   </ItemGroup>
 
