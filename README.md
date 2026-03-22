@@ -1,85 +1,98 @@
 # QaaS Elastic Bootstrap
 
-`QaaS.Framework.ElasticBootstrap` is an internal package that supplies default Elastic logging values to `QaaS.Framework.Executions` at runtime.
+`QaaS.ElasticConfiguration` is a small NuGet package that supplies fallback Elastic logging defaults to `QaaS.Framework.Executions`.
 
-It is intentionally separate from `QaaS.Framework` so the public framework package stays almost unchanged. The public path continues to use the normal command-line flags and logger configuration file behavior. This package is only for environments where you want to provide default Elastic settings from a local, controlled location.
-
-## What this package does
-
-- Registers Elastic logging defaults during application startup.
-- Reads those defaults from a local JSON file.
-- Does nothing when the JSON file is missing.
-- Does not change explicit user settings. In `QaaS.Framework`, explicit flags and logger configuration files still win.
+The package is meant to stay separate from `QaaS.Framework`. The framework keeps its normal flag-driven behavior, and this package only fills in defaults when a run did not already provide explicit Elastic settings.
 
 ## How it works
 
-The flow is:
+1. `QaaS.Framework.Executions` declares a NuGet dependency on `QaaS.ElasticConfiguration` version `1.0.0`.
+2. When a consuming app restores `QaaS.Framework.Executions`, NuGet also restores `QaaS.ElasticConfiguration`.
+3. This package injects a small module initializer into the consuming build through `buildTransitive`.
+4. On application startup, that initializer calls `QaaS.ElasticConfiguration.Bootstrap.Register()`.
+5. `Bootstrap.Register()` calls `QaaS.Framework.Executions.ExecutionLogging.RegisterDefaults(...)` by reflection.
+6. Later, `QaaS.Framework.Executions` uses those defaults only when the run did not already specify `send-logs`, `elastic-uri`, `elastic-username`, `elastic-password`, or a logger configuration file.
 
-1. A consuming application references `QaaS.Framework.ElasticBootstrap`.
-2. The package injects a small module initializer into that consuming build through `buildTransitive`.
-3. When the application starts, that initializer calls `QaaS.Framework.ElasticBootstrap.Bootstrap.Register()`.
-4. `Bootstrap.Register()` looks for a local JSON configuration file.
-5. If a configuration file is found, the bootstrap package calls `QaaS.Framework.Executions.ExecutionLogging.RegisterDefaults(...)`.
-6. Later, when `QaaS.Framework.Executions` builds the per-run logger, it uses those registered defaults only if the caller did not already provide explicit logging settings.
+The existing Elastic sink behavior in `QaaS.Framework` is unchanged. This package only provides fallback values.
 
-That means `QaaS.Framework` does **not** automatically discover this package by name from a NuGet source. The framework only becomes aware of it when the consuming application actually references the package and loads the bootstrap assembly at runtime.
+## Where to change the defaults
 
-## Important limitation
+The built-in values live in:
 
-NuGet will not restore this package automatically unless a consuming project references it, or another package in that project's graph depends on it.
+`QaaS.ElasticConfiguration/ElasticConfigurationDefaults.cs`
 
-That means this package solves the "keep QaaS.Framework minimal and internalize the defaults source" problem, but it does **not** by itself create zero-touch restore behavior for all consumers. If you want completely implicit restore in the air-gapped environment, something in the package graph still has to bring this package in.
+Public/default package values should stay:
 
-## Configuration file locations
+- `SendLogs = false`
+- `ElasticUri = null`
+- `ElasticUsername = null`
+- `ElasticPassword = null`
 
-The package checks these paths in order and uses the first file that exists:
+For the air-gapped variant, edit that file and rebuild the package with the same package ID and the same version.
 
-1. The path in the `QAAS_ELASTIC_BOOTSTRAP_CONFIG_PATH` environment variable.
-2. `qaas.elastic.bootstrap.json` next to the application binaries.
-3. `%ProgramData%\QaaS\ElasticBootstrap\settings.json`
+## Public package behavior
 
-## Configuration format
+The public package should be published as:
 
-```json
+- Package ID: `QaaS.ElasticConfiguration`
+- Version: `1.0.0`
+- Built-in defaults: disabled / null values
+
+That version is safe to publish publicly because it does not contain any classified endpoint or credentials.
+
+## Air-gapped package behavior
+
+Inside the air-gapped environment, publish another package with:
+
+- the same package ID: `QaaS.ElasticConfiguration`
+- the same version: `1.0.0`
+- different values in `ElasticConfigurationDefaults.cs`
+
+Your Artifactory virtual NuGet source must resolve the air-gapped bootstrap repo before the mirrored public repo. That way the virtual feed serves the internal `1.0.0` package, not the public `1.0.0` package.
+
+Do not rely on multiple client-side NuGet sources that both expose `QaaS.ElasticConfiguration` `1.0.0`. In local validation, NuGet preferred the package from the same source as `QaaS.Framework.Executions`. The override needs to happen server-side in the virtual feed that the client restores from.
+
+Example air-gapped defaults:
+
+```csharp
+public static class ElasticConfigurationDefaults
 {
-  "sendLogs": true,
-  "elasticUri": "https://your-internal-elastic:9200",
-  "elasticUsername": "optional-user",
-  "elasticPassword": "optional-password"
+    public static bool SendLogs => true;
+    public static string? ElasticUri => "http://your-internal-elastic:9200";
+    public static string? ElasticUsername => null;
+    public static string? ElasticPassword => null;
 }
 ```
 
-Notes:
+## Important limitation
 
-- Set `sendLogs` to `true` to enable the existing Elastic sink path.
-- Leave `elasticUsername` and `elasticPassword` empty if your internal Elastic endpoint does not use basic auth.
-- Do not put classified values in this repository. Put them only in the local JSON file inside the air-gapped environment.
+This design only works if the bootstrap package version required by `QaaS.Framework.Executions` is available on the restore sources used to build and consume the framework package.
 
-## Usage
-
-Reference the package from the application or package graph that eventually loads `QaaS.Framework.Executions`.
-
-Example:
-
-```xml
-<ItemGroup>
-  <PackageReference Include="QaaS.Framework.ElasticBootstrap" Version="1.0.0" />
-</ItemGroup>
-```
-
-Then place the JSON file in one of the supported locations.
-
-## Changing the defaults
-
-You do not need to rebuild the package to change the Elastic values.
-
-Change the JSON file in the chosen local path and restart the application. The package reads the file during startup.
+Because the framework package now depends on `QaaS.ElasticConfiguration`, you must publish the public `1.0.0` package before publishing a framework version that references it.
 
 ## Build
 
+Build:
+
 ```powershell
-dotnet build .\QaaS.ElasticBootstrap.sln -c Release
-dotnet pack .\QaaS.Framework.ElasticBootstrap\QaaS.Framework.ElasticBootstrap.csproj -c Release
+dotnet build .\QaaS.ElasticConfiguration.sln -c Release
+```
+
+Pack version `1.0.0`:
+
+```powershell
+dotnet pack .\QaaS.ElasticConfiguration\QaaS.ElasticConfiguration.csproj `
+  -c Release `
+  -p:PackageVersion=1.0.0 `
+  -p:Version=1.0.0
+```
+
+Example push to a NuGet source:
+
+```powershell
+dotnet nuget push .\QaaS.ElasticConfiguration\bin\Release\QaaS.ElasticConfiguration.1.0.0.nupkg `
+  --source <your-source-name> `
+  --skip-duplicate
 ```
 
 This repository intentionally does not include CI workflows.

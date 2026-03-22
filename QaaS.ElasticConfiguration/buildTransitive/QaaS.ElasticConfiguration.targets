@@ -1,0 +1,21 @@
+<Project>
+
+  <Target Name="QaaSElasticConfigurationInjectModuleInitializer"
+          BeforeTargets="CoreCompile"
+          Condition="'$(QaaSElasticConfigurationInjected)' != 'true'">
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)QaaS.ElasticConfiguration.g.cs"
+          DestinationFiles="$(IntermediateOutputPath)QaaS.ElasticConfiguration.g.cs" />
+
+    <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)QaaS.ElasticConfiguration.g.cs"
+               Link="QaaS.ElasticConfiguration.g.cs"
+               AutoGen="true"
+               Visible="false" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <QaaSElasticConfigurationInjected>true</QaaSElasticConfigurationInjected>
+    </PropertyGroup>
+  </Target>
+
+</Project>
