@@ -97,18 +97,23 @@ try {
         -p:PackageVersion=$PackageVersion `
         -p:Version=$PackageVersion
 
+    $packageFiles = Get-ChildItem $OutputDirectory -Filter "QaaS.ElasticBootstrap.$PackageVersion.nupkg" -File
+    $symbolPackages = Get-ChildItem $OutputDirectory -Filter "QaaS.ElasticBootstrap.$PackageVersion.snupkg" -File
+
     if ($PushToArtifactory) {
         if ([string]::IsNullOrWhiteSpace($ArtifactoryApiKey)) {
             throw "Artifactory push is enabled, but ArtifactoryApiKey is empty."
         }
 
-        dotnet nuget push (Join-Path $OutputDirectory "*.nupkg") `
-            --source $ArtifactorySource `
-            --api-key $ArtifactoryApiKey `
-            --skip-duplicate
+        foreach ($package in $packageFiles) {
+            dotnet nuget push $package.FullName `
+                --source $ArtifactorySource `
+                --api-key $ArtifactoryApiKey `
+                --skip-duplicate
+        }
 
-        Get-ChildItem $OutputDirectory -Filter "*.snupkg" -File | ForEach-Object {
-            dotnet nuget push $_.FullName `
+        foreach ($package in $symbolPackages) {
+            dotnet nuget push $package.FullName `
                 --source $ArtifactorySource `
                 --api-key $ArtifactoryApiKey `
                 --skip-duplicate
