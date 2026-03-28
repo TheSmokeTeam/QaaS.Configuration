@@ -105,4 +105,14 @@ dotnet nuget push .\QaaS.ElasticBootstrap\bin\Release\QaaS.ElasticBootstrap.1.0.
   --skip-duplicate
 ```
 
-For air-gapped use, do not change the public workflow. Instead, use the internal packaging script in `scripts/Publish-InternalElasticBootstrapPackage.ps1` to rebuild the same package ID and version with your internal defaults, then push that internal package to the higher-priority Artifactory source.
+For air-gapped use, do not change the public workflow. Instead, use `QaaS.ElasticBootstrap.Tools` to rebuild the same package ID and version with your internal defaults, then push that internal package to the higher-priority Artifactory source.
+
+```powershell
+dotnet run --project .\QaaS.ElasticBootstrap.Tools\QaaS.ElasticBootstrap.Tools.csproj -- `
+  --package-version 1.0.0 `
+  --send-logs true `
+  --elastic-uri http://your-internal-elastic:9200 `
+  --push-to-artifactory true `
+  --artifactory-source https://your-artifactory.example/api/nuget/qaas-local `
+  --artifactory-api-key <key>
+```
