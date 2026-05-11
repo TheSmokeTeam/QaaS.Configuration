@@ -1,10 +1,10 @@
-namespace QaaS.ElasticBootstrap;
+namespace QaaS.Configuration;
 
 /// <summary>
-/// Built-in fallback values registered by the bootstrap package when no explicit Elastic options were provided.
+/// Built-in fallback values registered by the configuration package when no explicit Elastic options were provided.
 /// Replace these values in the air-gapped variant and publish it with the same package ID and version.
 /// </summary>
-public static class ElasticBootstrapDefaults
+public static class ElasticDefaults
 {
     /// <summary>
     /// Enables the existing Elastic sink path when no explicit run value was provided.

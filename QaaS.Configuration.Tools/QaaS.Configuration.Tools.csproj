@@ -5,8 +5,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>QaaS.ElasticBootstrap.Tools</AssemblyName>
-    <RootNamespace>QaaS.ElasticBootstrap.Tools</RootNamespace>
+    <AssemblyName>QaaS.Configuration.Tools</AssemblyName>
+    <RootNamespace>QaaS.Configuration.Tools</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 

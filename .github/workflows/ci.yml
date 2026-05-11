@@ -19,8 +19,8 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   CONFIGURATION: Release
-  PROJECT_PATH: QaaS.ElasticBootstrap.sln
-  PACKAGE_PROJECT_PATH: QaaS.ElasticBootstrap\QaaS.ElasticBootstrap.csproj
+  PROJECT_PATH: QaaS.Configuration.sln
+  PACKAGE_PROJECT_PATH: QaaS.Configuration\QaaS.Configuration.csproj
   PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}\BuildOutput
 
 jobs:
@@ -51,7 +51,10 @@ jobs:
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
       - name: Build project
-        run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration ${{ env.CONFIGURATION }}
+        run: dotnet build ${{ env.PROJECT_PATH }} --no-restore --configuration ${{ env.CONFIGURATION }} -m:1
+
+      - name: Test project
+        run: dotnet test ${{ env.PROJECT_PATH }} --no-build --configuration ${{ env.CONFIGURATION }}
 
       - name: Pack package
         if: steps.stable_tag.outputs.is_stable_tag == 'true'

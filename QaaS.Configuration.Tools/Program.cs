@@ -1,14 +1,14 @@
 using System.Diagnostics;
 
-namespace QaaS.ElasticBootstrap.Tools;
+namespace QaaS.Configuration.Tools;
 
 /// <summary>
-/// Rebuilds the internal Elastic bootstrap package with environment-specific default values.
+/// Rebuilds the internal QaaS configuration package with environment-specific default values.
 /// </summary>
 internal static class Program
 {
     /// <summary>
-    /// Copies the repository into a disposable staging area, rewrites the defaults source file, packs the package, and optionally pushes it.
+    /// Copies the repository into a disposable staging area, rewrites the defaults source files, packs the package, and optionally pushes it.
     /// </summary>
     public static async Task<int> Main(string[] args)
     {
@@ -19,14 +19,17 @@ internal static class Program
         var elasticUri = arguments.GetOptionalValue("--elastic-uri") ?? "http://your-internal-elastic:9200";
         var elasticUsername = arguments.GetOptionalValue("--elastic-username");
         var elasticPassword = arguments.GetOptionalValue("--elastic-password");
+        var reportPortalEnabled = arguments.GetOptionalBool("--reportportal-enabled") ?? true;
+        var reportPortalUri = arguments.GetOptionalValue("--reportportal-uri");
+        var reportPortalApiKey = arguments.GetOptionalValue("--reportportal-api-key");
         var pushToArtifactory = arguments.GetOptionalBool("--push-to-artifactory") ?? false;
         var artifactorySource = arguments.GetOptionalValue("--artifactory-source") ?? "https://your-artifactory.example/api/nuget/qaas-local";
         var artifactoryApiKey = arguments.GetOptionalValue("--artifactory-api-key") ?? string.Empty;
 
-        var projectPath = Path.Combine(repositoryRoot, "QaaS.ElasticBootstrap", "QaaS.ElasticBootstrap.csproj");
+        var projectPath = Path.Combine(repositoryRoot, "QaaS.Configuration", "QaaS.Configuration.csproj");
         var artifactsRoot = Path.Combine(repositoryRoot, "artifacts");
         var outputDirectory = Path.Combine(artifactsRoot, "internal-package");
-        var tempRoot = Path.Combine(Path.GetTempPath(), $"qaas-elastic-bootstrap-{Guid.NewGuid():N}");
+        var tempRoot = Path.Combine(Path.GetTempPath(), $"qaas-configuration-{Guid.NewGuid():N}");
 
         if (!File.Exists(projectPath))
         {
@@ -41,16 +44,18 @@ internal static class Program
         {
             CopyRepositoryTree(repositoryRoot, tempRoot);
 
-            var defaultsFilePath = Path.Combine(tempRoot, "QaaS.ElasticBootstrap", "ElasticBootstrapDefaults.cs");
             await File.WriteAllTextAsync(
-                defaultsFilePath,
-                RenderDefaultsFile(sendLogs, elasticUri, elasticUsername, elasticPassword));
+                Path.Combine(tempRoot, "QaaS.Configuration", "ElasticDefaults.cs"),
+                DefaultsSourceRenderer.RenderElasticDefaultsFile(sendLogs, elasticUri, elasticUsername, elasticPassword));
+            await File.WriteAllTextAsync(
+                Path.Combine(tempRoot, "QaaS.Configuration", "ReportPortalDefaults.cs"),
+                DefaultsSourceRenderer.RenderReportPortalDefaultsFile(reportPortalEnabled, reportPortalUri, reportPortalApiKey));
 
             await ProcessRunner.RunAsync(
                 "dotnet",
                 [
                     "pack",
-                    Path.Combine(tempRoot, "QaaS.ElasticBootstrap", "QaaS.ElasticBootstrap.csproj"),
+                    Path.Combine(tempRoot, "QaaS.Configuration", "QaaS.Configuration.csproj"),
                     "-c",
                     "Release",
                     "-o",
@@ -60,9 +65,9 @@ internal static class Program
                 ],
                 tempRoot);
 
-            var packageFiles = Directory.EnumerateFiles(outputDirectory, $"QaaS.ElasticBootstrap.{packageVersion}.nupkg", SearchOption.TopDirectoryOnly)
+            var packageFiles = Directory.EnumerateFiles(outputDirectory, $"QaaS.Configuration.{packageVersion}.nupkg", SearchOption.TopDirectoryOnly)
                 .ToArray();
-            var symbolPackages = Directory.EnumerateFiles(outputDirectory, $"QaaS.ElasticBootstrap.{packageVersion}.snupkg", SearchOption.TopDirectoryOnly)
+            var symbolPackages = Directory.EnumerateFiles(outputDirectory, $"QaaS.Configuration.{packageVersion}.snupkg", SearchOption.TopDirectoryOnly)
                 .ToArray();
 
             if (pushToArtifactory)
@@ -91,7 +96,7 @@ internal static class Program
                 }
             }
 
-            Console.WriteLine($"Internal bootstrap package created in '{outputDirectory}'.");
+            Console.WriteLine($"Internal configuration package created in '{outputDirectory}'.");
             return 0;
         }
         finally
@@ -154,57 +159,6 @@ internal static class Program
     }
 
     /// <summary>
-    /// Recreates the generated defaults source file with the requested fallback values.
-    /// </summary>
-    private static string RenderDefaultsFile(
-        bool sendLogs,
-        string? elasticUri,
-        string? elasticUsername,
-        string? elasticPassword)
-    {
-        return $$"""
-                 namespace QaaS.ElasticBootstrap;
-                 
-                 /// <summary>
-                 /// Built-in fallback values registered by the bootstrap package when no explicit Elastic options were provided.
-                 /// Replace these values in the air-gapped variant and publish it with the same package ID and version.
-                 /// </summary>
-                 public static class ElasticBootstrapDefaults
-                 {
-                     /// <summary>
-                     /// Enables the existing Elastic sink path when no explicit run value was provided.
-                     /// </summary>
-                     public static bool SendLogs => {{sendLogs.ToString().ToLowerInvariant()}};
-                 
-                     /// <summary>
-                     /// Default Elasticsearch URI used only when no explicit run value was provided.
-                     /// </summary>
-                     public static string? ElasticUri => {{ToCSharpLiteral(elasticUri)}};
-                 
-                     /// <summary>
-                     /// Default Elasticsearch username used only when no explicit run value was provided.
-                     /// </summary>
-                     public static string? ElasticUsername => {{ToCSharpLiteral(elasticUsername)}};
-                 
-                     /// <summary>
-                     /// Default Elasticsearch password used only when no explicit run value was provided.
-                     /// </summary>
-                     public static string? ElasticPassword => {{ToCSharpLiteral(elasticPassword)}};
-                 }
-                 """;
-    }
-
-    /// <summary>
-    /// Converts optional string values into valid C# literals for the generated defaults source file.
-    /// </summary>
-    private static string ToCSharpLiteral(string? value)
-    {
-        return value is null
-            ? "null"
-            : $"\"{value.Replace("\\", "\\\\", StringComparison.Ordinal).Replace("\"", "\\\"", StringComparison.Ordinal)}\"";
-    }
-
-    /// <summary>
     /// Finds the repository root by walking up from the compiled tool output.
     /// </summary>
     private static string FindRepositoryRoot()
@@ -212,7 +166,7 @@ internal static class Program
         var current = new DirectoryInfo(AppContext.BaseDirectory);
         while (current is not null)
         {
-            if (File.Exists(Path.Combine(current.FullName, "QaaS.ElasticBootstrap.sln")))
+            if (File.Exists(Path.Combine(current.FullName, "QaaS.Configuration.sln")))
             {
                 return current.FullName;
             }
@@ -220,12 +174,12 @@ internal static class Program
             current = current.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate the QaaS.ElasticBootstrap repository root.");
+        throw new DirectoryNotFoundException("Could not locate the QaaS.Configuration repository root.");
     }
 }
 
 /// <summary>
-/// Minimal argument parser for the internal bootstrap packaging CLI.
+/// Minimal argument parser for the internal configuration packaging CLI.
 /// </summary>
 internal sealed class CommandArguments
 {
