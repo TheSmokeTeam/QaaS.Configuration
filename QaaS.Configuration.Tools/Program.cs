@@ -25,7 +25,7 @@ internal static class Program
         var pushToArtifactory = arguments.GetOptionalBool("--push-to-artifactory") ?? false;
         var artifactorySource = arguments.GetOptionalValue("--artifactory-source")
                                 ?? Environment.GetEnvironmentVariable("QAAS_ARTIFACTORY_SOURCE_URL")
-                                ?? "https://your-artifactory.example/api/nuget/qaas-local";
+                                ?? string.Empty;
         var artifactoryApiKey = arguments.GetOptionalValue("--artifactory-api-key")
                                 ?? Environment.GetEnvironmentVariable("QAAS_ARTIFACTORY_API_KEY")
                                 ?? string.Empty;
@@ -79,7 +79,13 @@ internal static class Program
                 if (string.IsNullOrWhiteSpace(artifactoryApiKey))
                 {
                     throw new InvalidOperationException(
-                        "Artifactory push is enabled, but --artifactory-api-key was not provided.");
+                        "Artifactory push is enabled, but --artifactory-api-key or QAAS_ARTIFACTORY_API_KEY was not provided.");
+                }
+
+                if (string.IsNullOrWhiteSpace(artifactorySource))
+                {
+                    throw new InvalidOperationException(
+                        "Artifactory push is enabled, but --artifactory-source or QAAS_ARTIFACTORY_SOURCE_URL was not provided.");
                 }
 
                 foreach (var package in packageFiles.Concat(symbolPackages))
