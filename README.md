@@ -135,6 +135,6 @@ dotnet run --project .\QaaS.Configuration.Tools\QaaS.Configuration.Tools.csproj 
   --reportportal-uri https://your-internal-reportportal `
   --reportportal-api-key <key> `
   --push-to-artifactory true `
-  --artifactory-source https://your-artifactory.example/api/nuget/qaas-local `
+  --artifactory-source <artifactory-source-url> `
   --artifactory-api-key <key>
 ```
