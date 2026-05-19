@@ -22,6 +22,7 @@ env:
   PROJECT_PATH: QaaS.Configuration.sln
   PACKAGE_PROJECT_PATH: QaaS.Configuration\QaaS.Configuration.csproj
   PACKAGE_OUTPUT_DIRECTORY: ${{ github.workspace }}\BuildOutput
+  QAAS_NUGET_PUSH_SOURCE_URL: ${{ vars.QAAS_NUGET_PUSH_SOURCE_URL || 'https://api.nuget.org/v3/index.json' }}
 
 jobs:
   build-test-deploy:
@@ -81,7 +82,7 @@ jobs:
 
       - name: Push package
         if: steps.stable_tag.outputs.is_stable_tag == 'true'
-        run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIRECTORY }}\*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push ${{ env.PACKAGE_OUTPUT_DIRECTORY }}\*.nupkg -k ${{ secrets.NUGET_AUTH_TOKEN }} -s "${{ env.QAAS_NUGET_PUSH_SOURCE_URL }}" --skip-duplicate
 
       - name: Push symbol package
         if: steps.stable_tag.outputs.is_stable_tag == 'true'
@@ -89,5 +90,5 @@ jobs:
         run: |
           $symbolPackages = Get-ChildItem "${{ env.PACKAGE_OUTPUT_DIRECTORY }}" -Filter "*.snupkg" -File
           foreach ($package in $symbolPackages) {
-            dotnet nuget push $package.FullName -k ${{ secrets.NUGET_AUTH_TOKEN }} -s https://api.nuget.org/v3/index.json --skip-duplicate
+            dotnet nuget push $package.FullName -k ${{ secrets.NUGET_AUTH_TOKEN }} -s "${{ env.QAAS_NUGET_PUSH_SOURCE_URL }}" --skip-duplicate
           }

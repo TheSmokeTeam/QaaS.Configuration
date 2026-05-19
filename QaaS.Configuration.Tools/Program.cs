@@ -23,8 +23,12 @@ internal static class Program
         var reportPortalUri = arguments.GetOptionalValue("--reportportal-uri");
         var reportPortalApiKey = arguments.GetOptionalValue("--reportportal-api-key");
         var pushToArtifactory = arguments.GetOptionalBool("--push-to-artifactory") ?? false;
-        var artifactorySource = arguments.GetOptionalValue("--artifactory-source") ?? "https://your-artifactory.example/api/nuget/qaas-local";
-        var artifactoryApiKey = arguments.GetOptionalValue("--artifactory-api-key") ?? string.Empty;
+        var artifactorySource = arguments.GetOptionalValue("--artifactory-source")
+                                ?? Environment.GetEnvironmentVariable("QAAS_ARTIFACTORY_SOURCE_URL")
+                                ?? "https://your-artifactory.example/api/nuget/qaas-local";
+        var artifactoryApiKey = arguments.GetOptionalValue("--artifactory-api-key")
+                                ?? Environment.GetEnvironmentVariable("QAAS_ARTIFACTORY_API_KEY")
+                                ?? string.Empty;
 
         var projectPath = Path.Combine(repositoryRoot, "QaaS.Configuration", "QaaS.Configuration.csproj");
         var artifactsRoot = Path.Combine(repositoryRoot, "artifacts");

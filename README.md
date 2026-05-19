@@ -90,7 +90,7 @@ This repository includes a GitHub Actions workflow that matches the QaaS package
 
 - it restores, builds, and tests on every push and pull request
 - it packs only when a Git tag is pushed
-- it publishes to NuGet.org using the repository secret `NUGET_AUTH_TOKEN`
+- it publishes to `QAAS_NUGET_PUSH_SOURCE_URL`, defaulting to NuGet.org, using the repository secret `NUGET_AUTH_TOKEN`
 
 ## Build
 
@@ -124,6 +124,7 @@ dotnet nuget push .\QaaS.Configuration\bin\Release\QaaS.Configuration.1.0.0.nupk
 ```
 
 For air-gapped use, do not change the public workflow. Instead, use `QaaS.Configuration.Tools` to rebuild the same package ID and version with your internal defaults, then push that internal package to the higher-priority Artifactory source.
+The tool accepts `--artifactory-source` and `--artifactory-api-key`; if they are omitted, it reads `QAAS_ARTIFACTORY_SOURCE_URL` and `QAAS_ARTIFACTORY_API_KEY` before falling back to the documented placeholder values.
 
 ```powershell
 dotnet run --project .\QaaS.Configuration.Tools\QaaS.Configuration.Tools.csproj -- `
