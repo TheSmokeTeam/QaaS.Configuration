@@ -80,7 +80,7 @@ public static class ConfigurationBootstrap
         try
         {
             var reportPortalConfigType = Type.GetType(
-                "QaaS.Runner.Assertions.ConfigurationObjects.ReportPortalConfig, QaaS.Runner.Assertions",
+                "QaaS.Runner.Assertions.ConfigurationObjects.ReporterConfigs.ReportPortalConfig, QaaS.Runner.Assertions",
                 throwOnError: false);
             var registerDefaultsMethod = reportPortalConfigType?.GetMethod(
                 "RegisterDefaults",
