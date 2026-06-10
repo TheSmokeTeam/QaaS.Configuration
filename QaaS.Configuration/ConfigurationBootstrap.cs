@@ -28,6 +28,14 @@ public static class ConfigurationBootstrap
 
     private static bool TryRegisterDefaults()
     {
+        var elasticRegistered = TryRegisterElasticDefaults();
+        var reportPortalRegistered = TryRegisterReportPortalDefaults();
+
+        return elasticRegistered || reportPortalRegistered;
+    }
+
+    private static bool TryRegisterElasticDefaults()
+    {
         try
         {
             var executionLoggingType = Type.GetType(
@@ -57,6 +65,45 @@ public static class ConfigurationBootstrap
                 ElasticDefaults.ElasticUri,
                 ElasticDefaults.ElasticUsername,
                 ElasticDefaults.ElasticPassword
+            ]);
+
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool TryRegisterReportPortalDefaults()
+    {
+        try
+        {
+            var reportPortalConfigType = Type.GetType(
+                "QaaS.Runner.Assertions.ConfigurationObjects.ReporterConfigs.ReportPortalConfig, QaaS.Runner.Assertions",
+                throwOnError: false);
+            var registerDefaultsMethod = reportPortalConfigType?.GetMethod(
+                "RegisterDefaults",
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types:
+                [
+                    typeof(bool),
+                    typeof(string),
+                    typeof(string)
+                ],
+                modifiers: null);
+
+            if (registerDefaultsMethod is null)
+            {
+                return false;
+            }
+
+            registerDefaultsMethod.Invoke(null,
+            [
+                ReportPortalDefaults.Enabled,
+                ReportPortalDefaults.ReportPortalUri,
+                ReportPortalDefaults.ReportPortalApiKey
             ]);
 
             return true;

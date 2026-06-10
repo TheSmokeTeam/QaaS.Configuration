@@ -8,9 +8,9 @@ namespace QaaS.Configuration.Tests;
 public sealed class ReportPortalDefaultsTests
 {
     [Test]
-    public void Enabled_DefaultsToTrue()
+    public void Enabled_DefaultsToFalse()
     {
-        Assert.That(ReportPortalDefaults.Enabled, Is.True);
+        Assert.That(ReportPortalDefaults.Enabled, Is.False);
     }
 
     [Test]
