@@ -10,10 +10,11 @@ The package is intentionally separate from `QaaS.Framework`. The framework keeps
 2. When a consuming app restores that package, NuGet also restores `QaaS.Configuration`.
 3. This package injects a small module initializer into the consuming build through `buildTransitive`.
 4. On application startup, that initializer calls `QaaS.Configuration.ConfigurationBootstrap.Register()`.
-5. `ConfigurationBootstrap.Register()` calls `QaaS.Framework.Executions.ExecutionLogging.RegisterDefaults(...)` by reflection.
+5. `ConfigurationBootstrap.Register()` calls the Elastic and ReportPortal default registration hooks by reflection.
 6. Later, `QaaS.Framework.Executions` uses Elastic defaults only when the run did not already specify `send-logs`, `elastic-uri`, `elastic-username`, `elastic-password`, or a logger configuration file.
+7. `QaaS.Runner.Assertions` uses ReportPortal defaults when environment values were not provided.
 
-The existing Elastic sink behavior in `QaaS.Framework` is unchanged. ReportPortal defaults are exposed as static values for consumers that opt into reading them.
+The existing Elastic sink behavior in `QaaS.Framework` is unchanged. ReportPortal keeps environment-variable values as the highest-priority runtime override.
 
 ## Where to change defaults
 
