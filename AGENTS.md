@@ -1,4 +1,4 @@
-# AGENTS.md — QaaS.Configuration
+﻿# AGENTS.md — QaaS.Configuration
 
 Guidance for AI agents working in this repository.
 
@@ -25,9 +25,13 @@ A **buildTransitive NuGet package** that injects fallback configuration defaults
 ## Build & test
 
 ```powershell
-dotnet build -m --no-restore        # after one dotnet restore
-dotnet test --no-build
-dotnet pack QaaS.Configuration/QaaS.Configuration.csproj -c Release -o <feed>
+dotnet restore QaaS.Configuration.sln
+dotnet build QaaS.Configuration.sln --no-restore -c Release -m:1
+dotnet test QaaS.Configuration.sln --no-build -c Release
+# Pack (on release tags only):
+dotnet pack QaaS.Configuration/QaaS.Configuration.csproj -c Release --no-build -p:PackageVersion=<version>
+# Push to a NuGet source:
+dotnet nuget push <path-to>.nupkg --source <source-name> --skip-duplicate
 ```
 
 ## Critical gotchas
