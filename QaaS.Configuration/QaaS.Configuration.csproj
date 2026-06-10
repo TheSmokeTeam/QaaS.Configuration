@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -20,16 +19,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="buildTransitive\QaaS.Configuration.props"
-          Pack="true"
-          PackagePath="buildTransitive\QaaS.Configuration.props" />
-    <None Include="buildTransitive\QaaS.Configuration.targets"
-          Pack="true"
-          PackagePath="buildTransitive\QaaS.Configuration.targets" />
-    <None Include="buildTransitive\QaaS.Configuration.g.cs"
-          Pack="true"
-          PackagePath="buildTransitive\QaaS.Configuration.g.cs" />
+    <None
+      Include="buildTransitive\QaaS.Configuration.props"
+      Pack="true"
+      PackagePath="buildTransitive\QaaS.Configuration.props"
+    />
+    <None
+      Include="buildTransitive\QaaS.Configuration.targets"
+      Pack="true"
+      PackagePath="buildTransitive\QaaS.Configuration.targets"
+    />
+    <None
+      Include="buildTransitive\QaaS.Configuration.g.cs"
+      Pack="true"
+      PackagePath="buildTransitive\QaaS.Configuration.g.cs"
+    />
     <None Include="..\README.md" Pack="true" PackagePath="/" Link="README.md" />
   </ItemGroup>
-
 </Project>
