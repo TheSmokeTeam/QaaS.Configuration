@@ -16,24 +16,34 @@ internal static class Program
         var repositoryRoot = arguments.GetOptionalPath("--repository-root") ?? FindRepositoryRoot();
         var packageVersion = arguments.GetOptionalValue("--package-version") ?? "1.0.0";
         var sendLogs = arguments.GetOptionalBool("--send-logs") ?? true;
-        var elasticUri = arguments.GetOptionalValue("--elastic-uri") ?? "http://your-internal-elastic:9200";
+        var elasticUri =
+            arguments.GetOptionalValue("--elastic-uri") ?? "http://your-internal-elastic:9200";
         var elasticUsername = arguments.GetOptionalValue("--elastic-username");
         var elasticPassword = arguments.GetOptionalValue("--elastic-password");
         var reportPortalEnabled = arguments.GetOptionalBool("--reportportal-enabled") ?? true;
         var reportPortalUri = arguments.GetOptionalValue("--reportportal-uri");
         var reportPortalApiKey = arguments.GetOptionalValue("--reportportal-api-key");
         var pushToArtifactory = arguments.GetOptionalBool("--push-to-artifactory") ?? false;
-        var artifactorySource = arguments.GetOptionalValue("--artifactory-source") ?? "https://your-artifactory.example/api/nuget/qaas-local";
+        var artifactorySource =
+            arguments.GetOptionalValue("--artifactory-source")
+            ?? "https://your-artifactory.example/api/nuget/qaas-local";
         var artifactoryApiKey = arguments.GetOptionalValue("--artifactory-api-key") ?? string.Empty;
 
-        var projectPath = Path.Combine(repositoryRoot, "QaaS.Configuration", "QaaS.Configuration.csproj");
+        var projectPath = Path.Combine(
+            repositoryRoot,
+            "QaaS.Configuration",
+            "QaaS.Configuration.csproj"
+        );
         var artifactsRoot = Path.Combine(repositoryRoot, "artifacts");
         var outputDirectory = Path.Combine(artifactsRoot, "internal-package");
         var tempRoot = Path.Combine(Path.GetTempPath(), $"qaas-configuration-{Guid.NewGuid():N}");
 
         if (!File.Exists(projectPath))
         {
-            throw new FileNotFoundException($"Project file not found at '{projectPath}'.", projectPath);
+            throw new FileNotFoundException(
+                $"Project file not found at '{projectPath}'.",
+                projectPath
+            );
         }
 
         Directory.CreateDirectory(artifactsRoot);
@@ -46,10 +56,21 @@ internal static class Program
 
             await File.WriteAllTextAsync(
                 Path.Combine(tempRoot, "QaaS.Configuration", "ElasticDefaults.cs"),
-                DefaultsSourceRenderer.RenderElasticDefaultsFile(sendLogs, elasticUri, elasticUsername, elasticPassword));
+                DefaultsSourceRenderer.RenderElasticDefaultsFile(
+                    sendLogs,
+                    elasticUri,
+                    elasticUsername,
+                    elasticPassword
+                )
+            );
             await File.WriteAllTextAsync(
                 Path.Combine(tempRoot, "QaaS.Configuration", "ReportPortalDefaults.cs"),
-                DefaultsSourceRenderer.RenderReportPortalDefaultsFile(reportPortalEnabled, reportPortalUri, reportPortalApiKey));
+                DefaultsSourceRenderer.RenderReportPortalDefaultsFile(
+                    reportPortalEnabled,
+                    reportPortalUri,
+                    reportPortalApiKey
+                )
+            );
 
             await ProcessRunner.RunAsync(
                 "dotnet",
@@ -61,13 +82,24 @@ internal static class Program
                     "-o",
                     outputDirectory,
                     $"-p:PackageVersion={packageVersion}",
-                    $"-p:Version={packageVersion}"
+                    $"-p:Version={packageVersion}",
                 ],
-                tempRoot);
+                tempRoot
+            );
 
-            var packageFiles = Directory.EnumerateFiles(outputDirectory, $"QaaS.Configuration.{packageVersion}.nupkg", SearchOption.TopDirectoryOnly)
+            var packageFiles = Directory
+                .EnumerateFiles(
+                    outputDirectory,
+                    $"QaaS.Configuration.{packageVersion}.nupkg",
+                    SearchOption.TopDirectoryOnly
+                )
                 .ToArray();
-            var symbolPackages = Directory.EnumerateFiles(outputDirectory, $"QaaS.Configuration.{packageVersion}.snupkg", SearchOption.TopDirectoryOnly)
+            var symbolPackages = Directory
+                .EnumerateFiles(
+                    outputDirectory,
+                    $"QaaS.Configuration.{packageVersion}.snupkg",
+                    SearchOption.TopDirectoryOnly
+                )
                 .ToArray();
 
             if (pushToArtifactory)
@@ -75,7 +107,8 @@ internal static class Program
                 if (string.IsNullOrWhiteSpace(artifactoryApiKey))
                 {
                     throw new InvalidOperationException(
-                        "Artifactory push is enabled, but --artifactory-api-key was not provided.");
+                        "Artifactory push is enabled, but --artifactory-api-key was not provided."
+                    );
                 }
 
                 foreach (var package in packageFiles.Concat(symbolPackages))
@@ -90,9 +123,10 @@ internal static class Program
                             artifactorySource,
                             "--api-key",
                             artifactoryApiKey,
-                            "--skip-duplicate"
+                            "--skip-duplicate",
                         ],
-                        repositoryRoot);
+                        repositoryRoot
+                    );
                 }
             }
 
@@ -174,7 +208,9 @@ internal static class Program
             current = current.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate the QaaS.Configuration repository root.");
+        throw new DirectoryNotFoundException(
+            "Could not locate the QaaS.Configuration repository root."
+        );
     }
 }
 
@@ -199,7 +235,10 @@ internal sealed class CommandArguments
                 continue;
             }
 
-            if (index + 1 < tokens.Length && !tokens[index + 1].StartsWith("--", StringComparison.Ordinal))
+            if (
+                index + 1 < tokens.Length
+                && !tokens[index + 1].StartsWith("--", StringComparison.Ordinal)
+            )
             {
                 parsed._values[tokens[index]] = tokens[index + 1];
                 index++;
@@ -241,7 +280,11 @@ internal static class ProcessRunner
     /// <summary>
     /// Runs a process and throws when it exits unsuccessfully.
     /// </summary>
-    public static async Task RunAsync(string fileName, IReadOnlyList<string> arguments, string workingDirectory)
+    public static async Task RunAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        string workingDirectory
+    )
     {
         var startInfo = new ProcessStartInfo
         {
@@ -249,7 +292,7 @@ internal static class ProcessRunner
             WorkingDirectory = workingDirectory,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            UseShellExecute = false
+            UseShellExecute = false,
         };
 
         foreach (var argument in arguments)
@@ -257,7 +300,8 @@ internal static class ProcessRunner
             startInfo.ArgumentList.Add(argument);
         }
 
-        using var process = Process.Start(startInfo)
+        using var process =
+            Process.Start(startInfo)
             ?? throw new InvalidOperationException($"Failed to start process '{fileName}'.");
         var outputTask = process.StandardOutput.ReadToEndAsync();
         var errorTask = process.StandardError.ReadToEndAsync();
@@ -278,7 +322,8 @@ internal static class ProcessRunner
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException(
-                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {process.ExitCode}.");
+                $"Command '{fileName} {string.Join(' ', arguments)}' failed with exit code {process.ExitCode}."
+            );
         }
     }
 }

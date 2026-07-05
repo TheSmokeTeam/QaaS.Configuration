@@ -40,32 +40,30 @@ public static class ConfigurationBootstrap
         {
             var executionLoggingType = Type.GetType(
                 "QaaS.Framework.Executions.ExecutionLogging, QaaS.Framework.Executions",
-                throwOnError: false);
+                throwOnError: false
+            );
             var registerDefaultsMethod = executionLoggingType?.GetMethod(
                 "RegisterDefaults",
                 BindingFlags.Public | BindingFlags.Static,
                 binder: null,
-                types:
-                [
-                    typeof(bool),
-                    typeof(string),
-                    typeof(string),
-                    typeof(string)
-                ],
-                modifiers: null);
+                types: [typeof(bool), typeof(string), typeof(string), typeof(string)],
+                modifiers: null
+            );
 
             if (registerDefaultsMethod is null)
             {
                 return false;
             }
 
-            registerDefaultsMethod.Invoke(null,
-            [
-                ElasticDefaults.SendLogs,
-                ElasticDefaults.ElasticUri,
-                ElasticDefaults.ElasticUsername,
-                ElasticDefaults.ElasticPassword
-            ]);
+            registerDefaultsMethod.Invoke(
+                null,
+                [
+                    ElasticDefaults.SendLogs,
+                    ElasticDefaults.ElasticUri,
+                    ElasticDefaults.ElasticUsername,
+                    ElasticDefaults.ElasticPassword,
+                ]
+            );
 
             return true;
         }
@@ -81,30 +79,29 @@ public static class ConfigurationBootstrap
         {
             var reportPortalConfigType = Type.GetType(
                 "QaaS.Runner.Assertions.ConfigurationObjects.ReporterConfigs.ReportPortalConfig, QaaS.Runner.Assertions",
-                throwOnError: false);
+                throwOnError: false
+            );
             var registerDefaultsMethod = reportPortalConfigType?.GetMethod(
                 "RegisterDefaults",
                 BindingFlags.Public | BindingFlags.Static,
                 binder: null,
-                types:
-                [
-                    typeof(bool),
-                    typeof(string),
-                    typeof(string)
-                ],
-                modifiers: null);
+                types: [typeof(bool), typeof(string), typeof(string)],
+                modifiers: null
+            );
 
             if (registerDefaultsMethod is null)
             {
                 return false;
             }
 
-            registerDefaultsMethod.Invoke(null,
-            [
-                ReportPortalDefaults.Enabled,
-                ReportPortalDefaults.ReportPortalUri,
-                ReportPortalDefaults.ReportPortalApiKey
-            ]);
+            registerDefaultsMethod.Invoke(
+                null,
+                [
+                    ReportPortalDefaults.Enabled,
+                    ReportPortalDefaults.ReportPortalUri,
+                    ReportPortalDefaults.ReportPortalApiKey,
+                ]
+            );
 
             return true;
         }

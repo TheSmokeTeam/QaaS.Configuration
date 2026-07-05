@@ -19,9 +19,15 @@ public sealed class ReportPortalDefaultsTests
         var source = DefaultsSourceRenderer.RenderReportPortalDefaultsFile(
             reportPortalEnabled: true,
             reportPortalUri: "https://reportportal.example",
-            reportPortalApiKey: null);
+            reportPortalApiKey: null
+        );
 
-        Assert.That(source, Does.Contain("public static string? ReportPortalUri => \"https://reportportal.example\";"));
+        Assert.That(
+            source,
+            Does.Contain(
+                "public static string? ReportPortalUri => \"https://reportportal.example\";"
+            )
+        );
     }
 
     [Test]
@@ -30,8 +36,12 @@ public sealed class ReportPortalDefaultsTests
         var source = DefaultsSourceRenderer.RenderReportPortalDefaultsFile(
             reportPortalEnabled: true,
             reportPortalUri: null,
-            reportPortalApiKey: "secret-api-key");
+            reportPortalApiKey: "secret-api-key"
+        );
 
-        Assert.That(source, Does.Contain("public static string? ReportPortalApiKey => \"secret-api-key\";"));
+        Assert.That(
+            source,
+            Does.Contain("public static string? ReportPortalApiKey => \"secret-api-key\";")
+        );
     }
 }
