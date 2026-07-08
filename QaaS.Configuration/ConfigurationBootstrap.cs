@@ -7,8 +7,15 @@ namespace QaaS.Configuration;
 /// </summary>
 public static class ConfigurationBootstrap
 {
+    private const string ExecutionLoggingAssemblyName = "QaaS.Framework.Executions";
+    private const string ExecutionLoggingTypeName = "QaaS.Framework.Executions.ExecutionLogging";
+    private const string ReportPortalConfigAssemblyName = "QaaS.Runner.Assertions";
+    private const string ReportPortalConfigTypeName =
+        "QaaS.Runner.Assertions.ConfigurationObjects.ReporterConfigs.ReportPortalConfig";
+
     private static readonly object SyncRoot = new();
-    private static bool _registered;
+    private static bool _elasticRegistered;
+    private static bool _reportPortalRegistered;
 
     /// <summary>
     /// Attempts to register the package defaults once.
@@ -17,30 +24,25 @@ public static class ConfigurationBootstrap
     {
         lock (SyncRoot)
         {
-            if (_registered)
+            if (!_elasticRegistered)
             {
-                return;
+                _elasticRegistered = TryRegisterElasticDefaults();
             }
 
-            _registered = TryRegisterDefaults();
+            if (!_reportPortalRegistered)
+            {
+                _reportPortalRegistered = TryRegisterReportPortalDefaults();
+            }
         }
-    }
-
-    private static bool TryRegisterDefaults()
-    {
-        var elasticRegistered = TryRegisterElasticDefaults();
-        var reportPortalRegistered = TryRegisterReportPortalDefaults();
-
-        return elasticRegistered || reportPortalRegistered;
     }
 
     private static bool TryRegisterElasticDefaults()
     {
         try
         {
-            var executionLoggingType = Type.GetType(
-                "QaaS.Framework.Executions.ExecutionLogging, QaaS.Framework.Executions",
-                throwOnError: false
+            var executionLoggingType = ResolveType(
+                ExecutionLoggingAssemblyName,
+                ExecutionLoggingTypeName
             );
             var registerDefaultsMethod = executionLoggingType?.GetMethod(
                 "RegisterDefaults",
@@ -77,9 +79,9 @@ public static class ConfigurationBootstrap
     {
         try
         {
-            var reportPortalConfigType = Type.GetType(
-                "QaaS.Runner.Assertions.ConfigurationObjects.ReporterConfigs.ReportPortalConfig, QaaS.Runner.Assertions",
-                throwOnError: false
+            var reportPortalConfigType = ResolveType(
+                ReportPortalConfigAssemblyName,
+                ReportPortalConfigTypeName
             );
             var registerDefaultsMethod = reportPortalConfigType?.GetMethod(
                 "RegisterDefaults",
@@ -110,4 +112,10 @@ public static class ConfigurationBootstrap
             return false;
         }
     }
+
+    private static Type? ResolveType(string assemblyName, string typeName) =>
+        Type.GetType($"{typeName}, {assemblyName}", throwOnError: false)
+        ?? AppDomain.CurrentDomain.GetAssemblies()
+            .FirstOrDefault(assembly => assembly.GetName().Name == assemblyName)
+            ?.GetType(typeName, throwOnError: false);
 }
