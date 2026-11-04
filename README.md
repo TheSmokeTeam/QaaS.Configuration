@@ -91,7 +91,7 @@ This repository includes a GitHub Actions workflow that matches the QaaS package
 
 - it restores, builds, and tests on every push and pull request
 - it packs only when a Git tag is pushed
-- it publishes to NuGet.org using the repository secret `NUGET_AUTH_TOKEN`
+- it publishes to NuGet.org through Trusted Publishing as `Smoke`, using the `TheSmokeTeam/QaaS.Configuration` policy for `ci.yml` and the `QaaS.Configuration` package
 
 ## Build
 
